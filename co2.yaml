@@ -1,0 +1,82 @@
+esphome:
+  name: esp32-co2
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+  password: "CHANGE_ME"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Co2 Fallback Hotspot"
+    password: "CHANGE_ME"
+
+captive_portal:
+
+
+uart:
+  - id: uart_a
+    rx_pin: GPIO16
+    tx_pin: GPIO17
+    baud_rate: 9600
+    
+  - id: uart_b
+    rx_pin: GPIO35
+    # tx_pin: GPIO35
+    baud_rate: 9600    
+
+i2c:
+  - id: bus_a
+    sda: GPIO21
+    scl: GPIO22
+    scan: true
+
+sensor:
+  - platform: senseair
+    uart_id: uart_a
+    co2:
+      name: "SenseAir CO2 Value"
+    update_interval: 60s
+    
+  - platform: bme280
+    i2c_id: bus_a
+    address: 0x76
+    temperature:
+      name: "BME280 Temperature"
+      oversampling: 16x
+    pressure:
+      name: "BME280 Pressure"
+    humidity:
+      name: "BME280 Humidity"
+    update_interval: 60s
+    
+  - platform: pmsx003
+    type: PMSX003
+    uart_id: uart_b
+    pm_1_0:
+      name: "PM1.0"
+      filters:
+      - throttle: 30s
+    pm_2_5:
+      name: "PM2.5"
+      filters:
+      - throttle: 30s
+    pm_10_0:
+      name: "PM10.0"
+      filters:
+      - throttle: 30s
+    
+    
